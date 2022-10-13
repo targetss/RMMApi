@@ -10,7 +10,7 @@ const (
 	host     = "localhost"
 	port     = 5432
 	user     = "postgres"
-	password = "Ss2454620!"
+	password = ""
 	dbname   = "demo"
 )
 
@@ -18,7 +18,7 @@ type DBObject struct {
 	DB *sql.DB
 }
 
-func CreateConnectDB() (*sql.DB, error) {
+func ConnectDB() (*sql.DB, error) {
 	strConn := fmt.Sprintf("user=%v host=%v port=%v password=%v dbname=%v sslmode=disable", user, host, port, password, dbname)
 	conn, err := sql.Open("postgres", strConn)
 	if err != nil {
