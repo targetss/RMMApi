@@ -1,21 +1,12 @@
 package main
 
 import (
-	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
-	"log"
 	"net/http"
 	"strings"
-)
-
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = ""
-	dbname   = "demo"
 )
 
 type Aircraft struct {
@@ -25,13 +16,6 @@ type Aircraft struct {
 }
 
 func getAircraft(c *gin.Context) {
-	strconn := fmt.Sprintf("user=%v host=%v port=%v password=%v dbname=%v sslmode=disable", user, host, port, password, dbname)
-	db, err := sql.Open("postgres", strconn)
-	if err != nil {
-		log.Print(err)
-	}
-
-	defer db.Close()
 
 	air := make([]Aircraft, 0)
 
@@ -55,6 +39,14 @@ func getAircraft(c *gin.Context) {
 
 func main() {
 	fmt.Println("DB Project")
+
+	connDB := new(DBObject)
+
+	er := errors.New("")
+	connDB.DB, er = CreateConnectDB()
+	if err != nil {
+		panic(err)
+	}
 
 	r := gin.Default()
 	r.GET("/aircraft", getAircraft)
