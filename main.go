@@ -8,20 +8,17 @@ import (
 
 func main() {
 	fmt.Println("DB Project")
-	var (
-		err error
-	)
 
 	connDB := new(DBObject)
+	connDB.InitialConnectDB()
+	connDB.InitialLogFile()
 
-	connDB.DB, err = ConnectDB()
-	if err != nil {
-		panic(err)
-	}
+	defer connDB.CloseConnection()
 
 	r := gin.Default()
-	r.GET("/aircraft", connDB.GetAircraft)
-	r.GET("/routes", connDB.GetRoutes)
+	r.GET("/account_user", connDB.GetAccountsUser)
+	//r.GET("/routes", connDB.GetRoutes)
+	//r.POST("/aircrafts", connDB.PostAircrafts)
 
 	r.Run("localhost:8080")
 }
