@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	host     = "localhost"
-	port     = 5432
-	user     = "lbysfyyk"
-	password = "zXIRi3RrROF4OeUW9Sfd"
-	dbname   = "tacticalrmm"
+	host = "localhost"
+	port = 5432
+	//user     = "lbysfyyk"
+	//password = "zXIRi3RrROF4OeUW9Sfd"
+	//dbname   = "tacticalrmm"
 )
 
 type DBObject struct {
@@ -22,6 +22,9 @@ type DBObject struct {
 }
 
 func (obj *DBObject) InitialConnectDB() {
+	user := os.Getenv("DBUser")
+	password := os.Getenv("DBPassword")
+	dbname := os.Getenv("DBName")
 	strConn := fmt.Sprintf("user=%v host=%v port=%v password=%v dbname=%v sslmode=disable", user, host, port, password, dbname)
 	conn, err := sql.Open("postgres", strConn)
 	if err != nil {
@@ -62,4 +65,10 @@ func (db *DBObject) InitialLogFile() {
 	if err != nil {
 		log.Println("Error open file Log")
 	}
+}
+
+func (db *DBObject) Write(strlog []byte) (int, error) {
+	strlog = append(strlog, byte('\n'))
+	count, err := db.log.Write(strlog)
+	return count, err
 }

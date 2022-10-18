@@ -3,16 +3,16 @@ package main
 import (
 	"database/sql"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 )
 
 func (db *DBObject) GetAccountsUser(c *gin.Context) {
 	AccountUsr := make([]AccountsUser, 0)
-	strConn := "select last_login, is_superuser, username, first_name, last_name, email, date_joined, last_login_ip from accounts_user where last_login < now()"
+	strConn := "select last_login, accounts_user.is_superuser, username, first_name, last_name, email, date_joined, last_login_ip, accounts_role.name " +
+		"from accounts_user, accounts_role where accounts_user.last_login < now() and accounts_user.role_id = accounts_role.id"
 	rows, err := db.DB.Query(strConn)
 	if err != nil {
-		log.Println(err)
+		db.Write([]byte(err.Error()))
 	}
 	defer rows.Close()
 
@@ -25,7 +25,7 @@ func (db *DBObject) GetAccountsUser(c *gin.Context) {
 	case nil:
 		for rows.Next() {
 			usr := AccountsUser{}
-			rows.Scan(&usr.lastLogin, &usr.isSuperUser, &usr.userName, &usr.firstName, &usr.lastName, &usr.email, &usr.dateJoined, &usr.lastLoginIP)
+			rows.Scan(&usr.LastLogin, &usr.IsSuperUser, &usr.UserName, &usr.FirstName, &usr.LastName, &usr.Email, &usr.DateJoined, &usr.LastLoginIP, &usr.RoleName)
 			AccountUsr = append(AccountUsr, usr)
 		}
 		c.IndentedJSON(http.StatusOK, AccountUsr)
@@ -35,6 +35,14 @@ func (db *DBObject) GetAccountsUser(c *gin.Context) {
 			"response": "Server error",
 		})
 	}
+
+}
+
+func (db *DBObject) GetPCToSite(c *gin.Context) {
+
+}
+
+func (db *DBObject) GetListSite(s *gin.Context) {
 
 }
 

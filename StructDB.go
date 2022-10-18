@@ -1,15 +1,18 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 // Упрощенная структура административных учетных записей TacticalRMM
 type AccountsUser struct {
-	lastLogin   time.Time `json:"last_login"`
-	isSuperUser bool      `json:"is_superuser"`
-	userName    string    `json:"username"`
-	firstName   string    `json:"first_name"`
-	lastName    string    `json:"last_name"`
-	email       string    `json:"email"`
-	dateJoined  time.Time `json:"date_joined"` //Дата создания учетной записи
-	lastLoginIP string    `json:"last_login_ip"`
+	LastLogin   time.Time `json:"last_login"`
+	IsSuperUser bool      `json:"is_superuser"`
+	UserName    string    `json:"username"`
+	FirstName   string    `json:"first_name"`
+	LastName    string    `json:"last_name"`
+	Email       string    `json:"email"`
+	DateJoined  time.Time `json:"date_joined"` //Дата создания учетной записи
+	LastLoginIP string    `json:"last_login_ip"`
+	RoleName    string    `json:"role"`
 }
