@@ -17,7 +17,9 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/account_user", connDB.GetAccountsUser)
-	r.GET("/list_site:id", connDB.GetListSite)
+	r.GET("/list_site", connDB.GetListSite)
+	r.GET("/pc_to_site/:id", connDB.GetPCToSite)
+	r.GET("info_pc/:id", connDB.GetInfoComputer)
 	//r.GET("/routes", connDB.GetRoutes)
 	//r.POST("/aircrafts", connDB.PostAircrafts)
 

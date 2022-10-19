@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strconv"
 )
 
 func (db *DBObject) GetAccountsUser(c *gin.Context) {
@@ -12,10 +14,9 @@ func (db *DBObject) GetAccountsUser(c *gin.Context) {
 		"from accounts_user, accounts_role where accounts_user.last_login < now() and accounts_user.role_id = accounts_role.id"
 	rows, err := db.DB.Query(strConn)
 	if err != nil {
-		db.Write([]byte(err.Error()))
+		db.log.Write([]byte(err.Error()))
 	}
 	defer rows.Close()
-
 	switch err {
 	case sql.ErrNoRows:
 		c.JSON(http.StatusOK, gin.H{
@@ -38,30 +39,67 @@ func (db *DBObject) GetAccountsUser(c *gin.Context) {
 
 }
 
+func (db *DBObject) GetInfoComputer(c *gin.Context) {
+
+}
+
 func (db *DBObject) GetPCToSite(c *gin.Context) {
+	ids := c.Param("id")
+	fmt.Println(ids)
+	id, err := strconv.Atoi(ids)
+	if err != nil || int(id) < 0 {
+		db.log.Write([]byte(err.Error()))
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":   http.StatusBadRequest,
+			"response": "Incorrect id \"Site\"",
+		})
+	}
+	pcSite := make([]ComputerInfo, 0)
+	strconn := "select id, hostname, description, version, operating_system, wmi_detail, site_id  from agents_agent where site_id = $1"
 
-}
-
-func (db *DBObject) GetListSite(s *gin.Context) {
-
-}
-
-/*
-func (db *DBObject) GetRoutes(c *gin.Context) {
-	routes := make([]Routes, 0)
-
-	strReq := "select * from bookings.routes"
-	res, err := db.DB.Query(strReq)
-	if err != nil {
-		log.Println(err)
+	res, err := db.DB.Query(strconn, id)
+	switch err {
+	case sql.ErrNoRows:
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":   http.StatusNotFound,
+			"response": "Content not found",
+		})
+	case nil:
+		for res.Next() {
+			var pc ComputerInfo
+			res.Scan(&pc.ID, &pc.Hostname, &pc.Description, &pc.VersionAgent, &pc.OperatingSystem, &pc.WMI, &pc.SiteID)
+			fmt.Println(pc.ID, pc.WMI)
+			pcSite = append(pcSite, pc)
+		}
+		c.JSON(http.StatusOK, pcSite)
+	default:
+		db.log.Write([]byte(err.Error()))
 	}
 
-	for res.Next() {
-		rt := Routes{}
-		res.Scan(&rt.Flight, &rt.DepartureAirport, &rt.DepartureAirportName, &rt.DepartureCity, &rt.ArrivalAirport, &rt.ArrivalAirportName, &rt.ArrivalCity, &rt.AircraftCode, &rt.Duration, (*pq.Int64Array)(&rt.DaysOfWeek)) //ТИП pq... !!!
-		routes = append(routes, rt)
-	}
-
-	c.IndentedJSON(200, routes)
 }
-*/
+
+func (db *DBObject) GetListSite(c *gin.Context) {
+	site := make([]Site, 0)
+
+	strRes := "select id, name, client_id, created_by from clients_site"
+
+	res, err := db.DB.Query(strRes)
+	switch err {
+	case sql.ErrNoRows:
+		c.JSON(http.StatusOK, gin.H{
+			"status":   http.StatusOK,
+			"response": "Content not found",
+		})
+	case nil:
+		for res.Next() {
+			var ls Site
+			res.Scan(&ls.ID, &ls.Name, &ls.ClientID, &ls.CreatedBy)
+			site = append(site, ls)
+		}
+	default:
+		c.JSON(http.StatusOK, gin.H{
+			"status":   http.StatusInternalServerError,
+			"response": "Server error",
+		})
+	}
+}
