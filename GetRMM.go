@@ -2,8 +2,10 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -67,8 +69,64 @@ func (db *DBObject) GetPCToSite(c *gin.Context) {
 	case nil:
 		for res.Next() {
 			var pc ComputerInfo
-			res.Scan(&pc.ID, &pc.Hostname, &pc.Description, &pc.VersionAgent, &pc.OperatingSystem, &pc.WMI, &pc.SiteID)
-			fmt.Println(pc.ID, pc.WMI)
+			var wmiInfoStr string
+
+			res.Scan(&pc.ID, &pc.Hostname, &pc.Description, &pc.VersionAgent, &pc.OperatingSystem, &wmiInfoStr, &pc.SiteID)
+
+			var q map[string][][]map[string]interface{}
+			if err := json.Unmarshal([]byte(wmiInfoStr), &q); err != nil {
+				log.Println(err)
+			}
+			pc.WMIInfo = make([]map[string]interface{}, 0)
+			for key, val := range q {
+				var interf map[string]interface{}
+				if key == "os" {
+					//m := q["os"][0][0]["Version"]
+
+					data := struct {
+						VersionSystem  string `json:"Caption"`
+						NameDNS        string `json:"CSName"`
+						OSArchitecture string `json:"OSArchitecture"`
+						//InstallDate    time.Time `json:"InstallDate"`
+					}{
+						VersionSystem:  fmt.Sprintf("%v", val[0][0]["Caption"]),
+						NameDNS:        fmt.Sprintf("%v", val[0][0]["CSName"]),
+						OSArchitecture: fmt.Sprintf("%v", val[0][0]["OSArchitecture"]),
+						//InstallDate:    fmt.Sprintf("%v", val[0][0]["InstallDate"]),
+					}
+					unmarsh, err := json.Marshal(&data)
+					if err != nil {
+						db.log.Write([]byte(err.Error()))
+					}
+					//var interf map[string]interface{}
+					json.Unmarshal(unmarsh, &interf)
+					pc.WMIInfo = append(pc.WMIInfo, interf)
+					//continue
+				}
+				if key == "cpu" {
+					dataCpu := struct {
+						Name        string `json:"Name"`
+						Family      string `json:"Family"`
+						L2CacheSize string `json:"L2CacheSize"`
+						L3CacheSize string `json:"L3CacheSize"`
+					}{
+						Name:        fmt.Sprintf("%v", val[0][0]["Name"]),
+						Family:      fmt.Sprintf("%v", val[0][0]["Family"]),
+						L2CacheSize: fmt.Sprintf("%v", val[0][0]["L2CacheSize"]),
+						L3CacheSize: fmt.Sprintf("%v", val[0][0]["L3CacheSize"]),
+					}
+					unmarsh, err := json.Marshal(&dataCpu)
+					if err != nil {
+						db.log.Write([]byte(err.Error()))
+					}
+					//var interf map[string]interface{}
+					r := json.Unmarshal(unmarsh, &interf)
+					if r != nil {
+						db.log.Write([]byte(r.Error()))
+					}
+					pc.WMIInfo = append(pc.WMIInfo, interf)
+				}
+			}
 			pcSite = append(pcSite, pc)
 		}
 		c.JSON(http.StatusOK, pcSite)
@@ -96,6 +154,7 @@ func (db *DBObject) GetListSite(c *gin.Context) {
 			res.Scan(&ls.ID, &ls.Name, &ls.ClientID, &ls.CreatedBy)
 			site = append(site, ls)
 		}
+		c.JSON(http.StatusOK, site)
 	default:
 		c.JSON(http.StatusOK, gin.H{
 			"status":   http.StatusInternalServerError,

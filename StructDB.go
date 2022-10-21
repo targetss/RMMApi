@@ -9,13 +9,13 @@ type Requests interface {
 
 // Информация по конкретному компьютеру
 type ComputerInfo struct {
-	ID              int    `json:"id"`
-	VersionAgent    string `json:"version"`
-	Description     string `json:"description"`
-	OperatingSystem string `json:"operating_system"`
-	Hostname        string `json:"hostname"`
-	WMI             string `json:"wmi_detail"`
-	SiteID          int    `json:"site_id"`
+	ID              int                      `json:"id"`
+	VersionAgent    string                   `json:"version"`
+	Description     string                   `json:"description"`
+	OperatingSystem string                   `json:"operating_system"`
+	Hostname        string                   `json:"hostname"`
+	WMIInfo         []map[string]interface{} `json:"wmi_detail"`
+	SiteID          int                      `json:"site_id"`
 }
 
 // Упрощенная структура административных учетных записей TacticalRMM
