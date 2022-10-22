@@ -11,9 +11,6 @@ import (
 const (
 	host = "localhost"
 	port = 5432
-	//user     = "lbysfyyk"
-	//password = "zXIRi3RrROF4OeUW9Sfd"
-	//dbname   = "tacticalrmm"
 )
 
 type DBObject struct {
@@ -67,8 +64,9 @@ func (db *DBObject) InitialLogFile() {
 	}
 }
 
-func (db *DBObject) Write(strlog []byte) (int, error) {
-	strlog = append(strlog, byte('\n'))
-	count, err := db.log.Write(strlog)
+func (db *DBObject) WriteLog(strlog string) (int, error) {
+	//strlog = append(strlog, byte('\n'))
+	count, err := db.log.WriteString(strlog)
+	db.log.WriteString("\n")
 	return count, err
 }

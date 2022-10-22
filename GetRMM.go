@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -16,7 +15,7 @@ func (db *DBObject) GetAccountsUser(c *gin.Context) {
 		"from accounts_user, accounts_role where accounts_user.last_login < now() and accounts_user.role_id = accounts_role.id"
 	rows, err := db.DB.Query(strConn)
 	if err != nil {
-		db.log.Write([]byte(err.Error()))
+		db.WriteLog(err.Error())
 	}
 	defer rows.Close()
 	switch err {
@@ -50,7 +49,7 @@ func (db *DBObject) GetPCToSite(c *gin.Context) {
 	fmt.Println(ids)
 	id, err := strconv.Atoi(ids)
 	if err != nil || int(id) < 0 {
-		db.log.Write([]byte(err.Error()))
+		db.WriteLog(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":   http.StatusBadRequest,
 			"response": "Incorrect id \"Site\"",
@@ -67,6 +66,7 @@ func (db *DBObject) GetPCToSite(c *gin.Context) {
 			"response": "Content not found",
 		})
 	case nil:
+	Next:
 		for res.Next() {
 			var pc ComputerInfo
 			var wmiInfoStr string
@@ -75,14 +75,22 @@ func (db *DBObject) GetPCToSite(c *gin.Context) {
 
 			var q map[string][][]map[string]interface{}
 			if err := json.Unmarshal([]byte(wmiInfoStr), &q); err != nil {
-				log.Println(err)
+				db.WriteLog(err.Error())
 			}
 			pc.WMIInfo = make([]map[string]interface{}, 0)
-			for key, val := range q {
-				var interf map[string]interface{}
-				if key == "os" {
-					//m := q["os"][0][0]["Version"]
 
+			//Проверка на корректность WMI
+			if len(q["os"]) == 0 {
+				q := map[string]interface{}{
+					"agent": "Agent incorrect install. WMI info not found",
+				}
+				pc.WMIInfo = append(pc.WMIInfo, q)
+				pcSite = append(pcSite, pc)
+				continue Next
+			}
+
+			for key, val := range q {
+				if key == "os" {
 					data := struct {
 						VersionSystem  string `json:"Caption"`
 						NameDNS        string `json:"CSName"`
@@ -94,16 +102,14 @@ func (db *DBObject) GetPCToSite(c *gin.Context) {
 						OSArchitecture: fmt.Sprintf("%v", val[0][0]["OSArchitecture"]),
 						//InstallDate:    fmt.Sprintf("%v", val[0][0]["InstallDate"]),
 					}
-					unmarsh, err := json.Marshal(&data)
+					marsh, err := json.Marshal(&data)
 					if err != nil {
-						db.log.Write([]byte(err.Error()))
+						db.WriteLog(err.Error())
 					}
-					//var interf map[string]interface{}
-					json.Unmarshal(unmarsh, &interf)
-					pc.WMIInfo = append(pc.WMIInfo, interf)
-					//continue
+					DeMarshalWMI(marsh, db, &pc)
 				}
 				if key == "cpu" {
+
 					dataCpu := struct {
 						Name        string `json:"Name"`
 						Family      string `json:"Family"`
@@ -115,23 +121,18 @@ func (db *DBObject) GetPCToSite(c *gin.Context) {
 						L2CacheSize: fmt.Sprintf("%v", val[0][0]["L2CacheSize"]),
 						L3CacheSize: fmt.Sprintf("%v", val[0][0]["L3CacheSize"]),
 					}
-					unmarsh, err := json.Marshal(&dataCpu)
+					marsh, err := json.Marshal(&dataCpu)
 					if err != nil {
-						db.log.Write([]byte(err.Error()))
+						db.WriteLog(err.Error())
 					}
-					//var interf map[string]interface{}
-					r := json.Unmarshal(unmarsh, &interf)
-					if r != nil {
-						db.log.Write([]byte(r.Error()))
-					}
-					pc.WMIInfo = append(pc.WMIInfo, interf)
+					DeMarshalWMI(marsh, db, &pc)
 				}
 			}
 			pcSite = append(pcSite, pc)
 		}
 		c.JSON(http.StatusOK, pcSite)
 	default:
-		db.log.Write([]byte(err.Error()))
+		db.WriteLog(err.Error())
 	}
 
 }
@@ -161,4 +162,14 @@ func (db *DBObject) GetListSite(c *gin.Context) {
 			"response": "Server error",
 		})
 	}
+}
+
+func DeMarshalWMI(data []byte, db *DBObject, dd *ComputerInfo) {
+	var interf map[string]interface{}
+
+	err := json.Unmarshal(data, &interf)
+	if err != nil {
+		db.WriteLog(err.Error())
+	}
+	dd.WMIInfo = append(dd.WMIInfo, interf)
 }

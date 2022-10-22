@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"io"
+	"os"
 )
 
 func main() {
@@ -15,13 +17,16 @@ func main() {
 
 	defer connDB.CloseConnection()
 
+	gin.DefaultWriter = io.MultiWriter(connDB.log, os.Stdout)
 	r := gin.Default()
-	r.GET("/account_user", connDB.GetAccountsUser)
-	r.GET("/list_site", connDB.GetListSite)
-	r.GET("/pc_to_site/:id", connDB.GetPCToSite)
-	r.GET("info_pc/:id", connDB.GetInfoComputer)
-	//r.GET("/routes", connDB.GetRoutes)
-	//r.POST("/aircrafts", connDB.PostAircrafts)
+
+	GInfo := r.Group("/info")
+	{
+		GInfo.GET("/users", connDB.GetAccountsUser)
+		GInfo.GET("/site", connDB.GetListSite)
+		GInfo.GET("/pc-site/:id", connDB.GetPCToSite)
+		GInfo.GET("pc-info/:id", connDB.GetInfoComputer)
+	}
 
 	r.Run("localhost:8080")
 }
