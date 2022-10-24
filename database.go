@@ -31,19 +31,6 @@ func (obj *DBObject) InitialConnectDB() {
 	obj.DB = conn
 }
 
-/*
-func ConnectDB() (*sql.DB, error) {
-	strConn := fmt.Sprintf("user=%v host=%v port=%v password=%v dbname=%v sslmode=disable", user, host, port, password, dbname)
-	conn, err := sql.Open("postgres", strConn)
-	if err != nil {
-		log.Println("Database connection error: ", err)
-		return nil, err
-	}
-
-	return conn, nil
-}
-*/
-
 func (db *DBObject) CloseConnection() {
 	db.DB.Close()
 }
