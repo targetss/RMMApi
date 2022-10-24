@@ -12,7 +12,7 @@ func (db *DBObject) GenerateToken(c *gin.Context) {
 }
 
 func (db *DBObject) RegisterUser(c *gin.Context) {
-	strAddData := "INSERT INTO user (name, username, email, password) values($1, $2, $3, $4)"
+	strAddData := "INSERT INTO users (name, username, email, password) values($1, $2, $3, $4)"
 
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
