@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -41,12 +42,62 @@ func (db *DBObject) GetAccountsUser(c *gin.Context) {
 }
 
 func (db *DBObject) GetInfoComputer(c *gin.Context) {
+	var (
+		pcInfo                       FullComputerInfo
+		strWMI, strDisk, strSoftware string
+		jsonDisks                    []map[string]interface{}
+		jsonWMI                      map[string][][]map[string]interface{}
+		jsonSoftware                 []map[string]interface{}
+	)
+	idtemp := c.Param("id")
+	id, err := strconv.Atoi(idtemp)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":   http.StatusBadRequest,
+			"response": "Error param id agent computer",
+		})
+		c.Abort()
+		return
+	}
+	connSearch := "select agents_agent.id, agents_agent.version, agents_agent.description, agents_agent.operating_system, agents_agent.disks," +
+		" agents_agent.public_ip, agents_agent.total_ram, agents_agent.logged_in_username, agents_agent.goarch, " +
+		"software_installedsoftware.software, agents_agent.hostname, agents_agent.wmi_detail, agents_agent.site_id " +
+		"from agents_agent, software_installedsoftware where agents_agent.id =$1 and software_installedsoftware.agent_id = $2"
 
+	result := db.DB.QueryRow(connSearch, id, id)
+	err = result.Scan(&pcInfo.ID, &pcInfo.VersionAgent, &pcInfo.Description, &pcInfo.OperatingSystem, &strDisk, &pcInfo.PublicIP, &pcInfo.TotalRAM, &pcInfo.LoggedInUsername, &pcInfo.Goarch,
+		&strSoftware, &pcInfo.Hostname, &strWMI, &pcInfo.SiteID)
+	switch err {
+	case sql.ErrNoRows:
+		c.JSON(http.StatusNoContent, gin.H{
+			"status":   http.StatusNoContent,
+			"response": "Computer not found, check id agent",
+		})
+		c.Abort()
+	case nil:
+
+		if err := json.Unmarshal([]byte(strDisk), &jsonDisks); err != nil {
+			db.WriteLog("Error unmarshal string diskInfo")
+		}
+		if err := json.Unmarshal([]byte(strWMI), &jsonWMI); err != nil {
+			db.WriteLog("Error unmarshal string wmiInfo")
+		}
+		if err := json.Unmarshal([]byte(strSoftware), &jsonSoftware); err != nil {
+			db.WriteLog("Error unmarshal string softwareInfo")
+		}
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":   http.StatusInternalServerError,
+			"response": "Internal server error",
+		})
+		c.Abort()
+	}
+	log.Println(err)
 }
 
 func (db *DBObject) GetPCToSite(c *gin.Context) {
 	ids := c.Param("id")
-	fmt.Println(ids)
+	//fmt.Println(ids)
 	id, err := strconv.Atoi(ids)
 	if err != nil || int(id) < 0 {
 		db.WriteLog(err.Error())

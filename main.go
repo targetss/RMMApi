@@ -24,18 +24,18 @@ func main() {
 	gin.DefaultWriter = io.MultiWriter(connDB.log, os.Stdout)
 	r := gin.Default()
 
-	GInfo := r.Group("/info")
+	/*GInfo := r.Group("/info")
 	{
 		GInfo.GET("/users", connDB.GetAccountsUser)
 		GInfo.GET("/site", connDB.GetListSite)
 		GInfo.GET("/pc-site/:id", connDB.GetPCToSite)
 		GInfo.GET("/pc-info/:id", connDB.GetInfoComputer)
-	}
+	}*/
 	auth := r.Group("/auth")
 	{
 		auth.POST("/register", connDB.RegisterUser)
 		auth.POST("/token", connDB.GenerateToken)
-		api := auth.Group("/api").Use(Auth())
+		api := auth.Group("/api").Use(connDB.Auth())
 		{
 			api.GET("/users", connDB.GetAccountsUser)
 			api.GET("/site", connDB.GetListSite)

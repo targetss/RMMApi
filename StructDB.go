@@ -7,6 +7,22 @@ import (
 type Requests interface {
 }
 
+type FullComputerInfo struct {
+	ID               int                      `json:"id"`
+	VersionAgent     string                   `json:"version"`
+	Description      string                   `json:"description"`
+	OperatingSystem  string                   `json:"operating_system"`
+	Disks            []map[string]interface{} `json:"disks"`
+	PublicIP         string                   `json:"public_ip"`
+	TotalRAM         int                      `json:"total_ram"`
+	LoggedInUsername string                   `json:"logged_in_username"`
+	Goarch           string                   `json:"goarch"`
+	Software         []map[string]interface{} `json:"software"`
+	Hostname         string                   `json:"hostname"`
+	WMIInfo          []map[string]interface{} `json:"wmi_detail"`
+	SiteID           int                      `json:"site_id"`
+}
+
 // Информация по конкретному компьютеру
 type ComputerInfo struct {
 	ID              int                      `json:"id"`
