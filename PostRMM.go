@@ -1,13 +1,57 @@
 package main
 
 import (
+	"RestApi/auth"
 	"RestApi/models"
+	"database/sql"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 func (db *DBObject) GenerateToken(c *gin.Context) {
+	strConn := "select name, username, password from users where username = $1"
+	var userReq models.User
+	var userDB models.User
+	if err := c.ShouldBindJSON(&userReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":   http.StatusBadRequest,
+			"response": "Incorrect data auth",
+		})
+		db.WriteLog("Incorrect bind json (GenerateToken)")
+		c.Abort()
+	}
+	result := db.DB.QueryRow(strConn, userReq.Username)
+	err := result.Scan(&userDB.Name, &userDB.Username, &userDB.Password)
+	switch err {
+	case sql.ErrNoRows:
+		c.JSON(http.StatusNoContent, gin.H{
+			"status":   http.StatusNoContent,
+			"response": "User not found",
+		})
+	case nil:
+		if err := userDB.CheckPassword(userReq.Password); err != nil {
+			c.JSON(http.StatusForbidden, gin.H{
+				"status":   http.StatusForbidden,
+				"response": "Password incorrect",
+			})
+			c.Abort()
+		}
+		tokenString, err := auth.GenerateJWT(userReq.Email, userReq.Username)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": err.Error(),
+			})
+			c.Abort()
+			return
+		}
+		c.SetCookie("JWTAuth", tokenString, 3600, "/", "localhost", false, true)
+	default:
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":   http.StatusInternalServerError,
+			"response": "Error work database",
+		})
+	}
 
 }
 

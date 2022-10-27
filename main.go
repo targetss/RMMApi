@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"io"
+	"net/http"
 	"os"
 )
 
@@ -24,13 +25,29 @@ func main() {
 	gin.DefaultWriter = io.MultiWriter(connDB.log, os.Stdout)
 	r := gin.Default()
 
-	/*GInfo := r.Group("/info")
-	{
-		GInfo.GET("/users", connDB.GetAccountsUser)
-		GInfo.GET("/site", connDB.GetListSite)
-		GInfo.GET("/pc-site/:id", connDB.GetPCToSite)
-		GInfo.GET("/pc-info/:id", connDB.GetInfoComputer)
-	}*/
+	r.GET("/cookie", func(c *gin.Context) {
+		cookie, err := c.Cookie("gin_cookie")
+		if err != nil {
+			cookie = "NoSet"
+			c.SetCookie("auth_jwt", "jwt_id1", 0, "/", "localhost", false, true)
+		}
+		fmt.Printf("cookie: %s \n", cookie)
+	})
+	r.GET("/test_cookie", func(c *gin.Context) {
+		cookiejwt, err := c.Cookie("auth_jwt")
+		if err != nil {
+			c.JSON(http.StatusForbidden, gin.H{
+				"status":   http.StatusForbidden,
+				"response": "error cookie",
+			})
+			c.Abort()
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"status": http.StatusOK,
+			"jwt":    cookiejwt,
+		})
+	})
+
 	auth := r.Group("/auth")
 	{
 		auth.POST("/register", connDB.RegisterUser)
