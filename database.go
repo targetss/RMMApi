@@ -57,3 +57,17 @@ func (db *DBObject) WriteLog(strlog string) (int, error) {
 	db.log.WriteString("\n")
 	return count, err
 }
+
+func (db *DBObject) CheckUserInTable(paramQuery ...string) {
+	if countParam := len(paramQuery); countParam < 1 {
+		return
+	}
+	str := make([]string, 0)
+	for i, v := range paramQuery {
+		if i == 1 {
+			return
+		}
+		str = append(str, v)
+	}
+	db.DB.QueryRow(paramQuery[0])
+}
