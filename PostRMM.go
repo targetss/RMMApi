@@ -13,19 +13,26 @@ func (db *DBObject) GenerateToken(c *gin.Context) {
 	strConn := "select name, username, password from users where username = $1"
 	var userReq models.User
 	var userDB models.User
-	if err := c.ShouldBindJSON(&userReq); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"status":   http.StatusBadRequest,
-			"response": "Incorrect data auth",
+
+	if err := c.ShouldBind(&userReq); err != nil {
+		c.HTML(http.StatusUnauthorized, "auth.tmpl", gin.H{
+			"status": "Data auth error",
 		})
-		db.WriteLog("Incorrect bind json (GenerateToken)")
-		c.Abort()
 	}
+	/*
+		if err := c.ShouldBindJSON(&userReq); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":   http.StatusBadRequest,
+				"response": "Incorrect data auth",
+			})
+			db.WriteLog("Incorrect bind json (GenerateToken)")
+			//c.Abort()
+		}*/
 	result := db.DB.QueryRow(strConn, userReq.Username)
 	err := result.Scan(&userDB.Name, &userDB.Username, &userDB.Password)
 	switch err {
 	case sql.ErrNoRows:
-		c.JSON(http.StatusNoContent, gin.H{
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":   http.StatusNoContent,
 			"response": "User not found",
 		})
@@ -35,17 +42,18 @@ func (db *DBObject) GenerateToken(c *gin.Context) {
 				"status":   http.StatusForbidden,
 				"response": "Password incorrect",
 			})
-			c.Abort()
+			//c.Abort()
 		}
-		tokenString, err := auth.GenerateJWT(userReq.Email, userReq.Username)
+		tokenString, err := auth.GenerateJWT(userDB.Email, userDB.Username)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": err.Error(),
 			})
-			c.Abort()
+			//c.Abort()
 			return
 		}
 		c.SetCookie("JWTAuth", tokenString, 3600, "/", "localhost", false, true)
+		c.Redirect(http.StatusFound, "/auth/api/users")
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":   http.StatusInternalServerError,
@@ -67,36 +75,38 @@ func (db *DBObject) RegisterUser(c *gin.Context) {
 		db.WriteLog("Incorrect bind json (RegisterUser)")
 	}
 	if err := user.HashPassword(user.Password); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status":   http.StatusInternalServerError,
-			"response": "incorrect password",
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":   http.StatusBadRequest,
+			"response": "incorrect data password",
 		})
 		db.WriteLog(fmt.Sprintf("Incorrect hashPassword, password:%v", user.Password))
 		c.Abort()
 	}
 
-	//var usr models.User
-	strSearchUserRMM := "select username, email from accounts_user where username = '$1' and email = '$1'"
+	var usr models.User
+	strSearchUserRMM := "select username, email from accounts_user where username = $1 and email = $2"
 	userResult := db.DB.QueryRow(strSearchUserRMM, user.Username, user.Email)
-	err := userResult.Scan()
+	err := userResult.Scan(&usr.Username, &usr.Email)
 	switch err {
 	case sql.ErrNoRows:
-		c.JSON(http.StatusNoContent, gin.H{
+		c.JSON(http.StatusBadRequest, gin.H{
 			"status":   http.StatusNoContent,
-			"response": "Account not fount server TacticalRMM",
+			"response": "Account not found server TacticalRMM",
 		})
 		c.Abort()
 	case nil:
 
 		res, err := db.DB.Exec(strAddData, user.Name, user.Username, user.Email, user.Password)
 		if err != nil {
+
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"status":   http.StatusInternalServerError,
-				"response": "InternalServerError",
+				"response": err.Error(),
 			})
 			db.WriteLog("Ошибка запроса в базу данных!")
 			c.Abort()
 		}
+
 		countAdd, _ := res.RowsAffected()
 		c.JSON(http.StatusOK, gin.H{
 			"username":    user.Username,
@@ -107,7 +117,7 @@ func (db *DBObject) RegisterUser(c *gin.Context) {
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":   http.StatusInternalServerError,
-			"response": "Server internal Error",
+			"response": err.Error(),
 		})
 		c.Abort()
 	}

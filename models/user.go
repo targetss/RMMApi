@@ -7,9 +7,9 @@ import (
 
 type User struct {
 	Name     string `json:"name"`
-	Username string `json:"username" gorm:"unique"`
+	Username string `form:"username", json:"username", gorm:"unique"`
 	Email    string `json:"email" gorm:"unique"`
-	Password string `json:"password"`
+	Password string `form:"password", json:"password"`
 }
 
 func (user *User) HashPassword(pswd string) error {

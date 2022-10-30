@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	"io"
-	"net/http"
 	"os"
 )
 
@@ -25,31 +24,11 @@ func main() {
 	gin.DefaultWriter = io.MultiWriter(connDB.log, os.Stdout)
 	r := gin.Default()
 
-	r.GET("/cookie", func(c *gin.Context) {
-		cookie, err := c.Cookie("gin_cookie")
-		if err != nil {
-			cookie = "NoSet"
-			c.SetCookie("auth_jwt", "jwt_id1", 0, "/", "localhost", false, true)
-		}
-		fmt.Printf("cookie: %s \n", cookie)
-	})
-	r.GET("/test_cookie", func(c *gin.Context) {
-		cookiejwt, err := c.Cookie("auth_jwt")
-		if err != nil {
-			c.JSON(http.StatusForbidden, gin.H{
-				"status":   http.StatusForbidden,
-				"response": "error cookie",
-			})
-			c.Abort()
-		}
-		c.JSON(http.StatusOK, gin.H{
-			"status": http.StatusOK,
-			"jwt":    cookiejwt,
-		})
-	})
+	r.LoadHTMLGlob("C:\\Users\\admin\\GolandProjects\\RestApi\\templates\\*")
 
 	auth := r.Group("/auth")
 	{
+		auth.GET("/authorization", connDB.Authorization)
 		auth.POST("/register", connDB.RegisterUser)
 		auth.POST("/token", connDB.GenerateToken)
 		api := auth.Group("/api").Use(connDB.Auth())

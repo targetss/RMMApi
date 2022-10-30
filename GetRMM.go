@@ -1,6 +1,7 @@
 package main
 
 import (
+	"RestApi/auth"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,14 @@ import (
 	"net/http"
 	"strconv"
 )
+
+func (db *DBObject) Authorization(c *gin.Context) {
+	goodCookie, err := c.Cookie("JWTAuth")
+	if err != nil || auth.ValidateToken(goodCookie) != nil {
+		c.HTML(http.StatusOK, "auth.tmpl", gin.H{})
+	}
+	c.Redirect(http.StatusFound, "/auth/api/users")
+}
 
 func (db *DBObject) GetAccountsUser(c *gin.Context) {
 	AccountUsr := make([]AccountsUser, 0)
@@ -31,7 +40,10 @@ func (db *DBObject) GetAccountsUser(c *gin.Context) {
 			rows.Scan(&usr.LastLogin, &usr.IsSuperUser, &usr.UserName, &usr.FirstName, &usr.LastName, &usr.Email, &usr.DateJoined, &usr.LastLoginIP, &usr.RoleName)
 			AccountUsr = append(AccountUsr, usr)
 		}
-		c.IndentedJSON(http.StatusOK, AccountUsr)
+		//c.IndentedJSON(http.StatusOK, AccountUsr)
+		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+			"users": AccountUsr,
+		})
 	default:
 		c.JSON(http.StatusOK, gin.H{
 			"status":   http.StatusInternalServerError,
@@ -99,12 +111,14 @@ func (db *DBObject) GetPCToSite(c *gin.Context) {
 	ids := c.Param("id")
 	//fmt.Println(ids)
 	id, err := strconv.Atoi(ids)
-	if err != nil || int(id) < 0 {
-		db.WriteLog(err.Error())
+	if err != nil || id < 0 {
+		//db.WriteLog(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status":   http.StatusBadRequest,
 			"response": "Incorrect id \"Site\"",
 		})
+		c.Abort()
+		return
 	}
 	pcSite := make([]ComputerInfo, 0)
 	strconn := "select id, hostname, description, version, operating_system, wmi_detail, site_id  from agents_agent where site_id = $1"
