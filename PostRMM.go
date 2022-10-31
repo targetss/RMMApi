@@ -53,7 +53,7 @@ func (db *DBObject) GenerateToken(c *gin.Context) {
 			return
 		}
 		c.SetCookie("JWTAuth", tokenString, 3600, "/", "localhost", false, true)
-		c.Redirect(http.StatusFound, "/auth/api/users")
+		c.Redirect(http.StatusFound, "/api/users")
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":   http.StatusInternalServerError,

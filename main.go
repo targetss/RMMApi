@@ -24,11 +24,12 @@ func main() {
 	gin.DefaultWriter = io.MultiWriter(connDB.log, os.Stdout)
 	r := gin.Default()
 
-	r.LoadHTMLGlob("C:\\Users\\admin\\GolandProjects\\RestApi\\templates\\*")
+	r.LoadHTMLGlob("C:\\Users\\admin\\go\\src\\RestApi\\templates\\*")
 
-	auth := r.Group("/auth")
+	auth := r.Group("/")
 	{
-		auth.GET("/authorization", connDB.Authorization)
+		auth.GET("/", connDB.Authorization)
+		//auth.GET("/authorization", connDB.Authorization)
 		auth.POST("/register", connDB.RegisterUser)
 		auth.POST("/token", connDB.GenerateToken)
 		api := auth.Group("/api").Use(connDB.Auth())

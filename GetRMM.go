@@ -16,7 +16,7 @@ func (db *DBObject) Authorization(c *gin.Context) {
 	if err != nil || auth.ValidateToken(goodCookie) != nil {
 		c.HTML(http.StatusOK, "auth.tmpl", gin.H{})
 	}
-	c.Redirect(http.StatusFound, "/auth/api/users")
+	c.Redirect(http.StatusFound, "/api/users")
 }
 
 func (db *DBObject) GetAccountsUser(c *gin.Context) {
