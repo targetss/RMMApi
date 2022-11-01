@@ -25,6 +25,7 @@ func main() {
 	r := gin.Default()
 
 	r.LoadHTMLGlob("C:\\Users\\admin\\go\\src\\RestApi\\templates\\*")
+	r.Static("/img", "C:\\Users\\admin\\go\\src\\RestApi\\img")
 
 	auth := r.Group("/")
 	{
@@ -32,6 +33,7 @@ func main() {
 		//auth.GET("/authorization", connDB.Authorization)
 		auth.POST("/register", connDB.RegisterUser)
 		auth.POST("/token", connDB.GenerateToken)
+		auth.GET("/exit", connDB.Exit)
 		api := auth.Group("/api").Use(connDB.Auth())
 		{
 			api.GET("/users", connDB.GetAccountsUser)

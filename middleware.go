@@ -10,7 +10,7 @@ func (db *DBObject) Auth() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		cookie, err := c.Cookie("JWTAuth")
-		if err != nil {
+		if err != nil || auth.ValidateToken(cookie) != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"status":   http.StatusUnauthorized,
 				"response": "NoAuth",
@@ -18,15 +18,17 @@ func (db *DBObject) Auth() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		if err := auth.ValidateToken(cookie); err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"status":   http.StatusUnauthorized,
-				"response": "Token no Valid",
-			})
-			c.Abort()
-			return
-		}
-		c.Next()
+		/*
+			if err := auth.ValidateToken(cookie); err != nil {
+				c.JSON(http.StatusUnauthorized, gin.H{
+					"status":   http.StatusUnauthorized,
+					"response": "Token no Valid",
+				})
+				c.Abort()
+				return
+			}
+			c.Next()
+		*/
 	}
 
 	//Проверка по Хедеру, проверяет json с учетками авторизации

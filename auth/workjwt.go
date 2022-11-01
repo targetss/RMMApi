@@ -33,6 +33,10 @@ func ValidateToken(signedToken string) (err error) {
 	token, err := jwt.ParseWithClaims(signedToken, &JWTClaim{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(JWTKey), nil
 	})
+	if err != nil {
+		return errors.New("token contains an invalid number of segments")
+
+	}
 	if claims, ok := token.Claims.(*JWTClaim); ok && token.Valid {
 		if claims.ExpiresAt.Unix() < time.Now().Local().Unix() {
 			err = errors.New("Token expired")

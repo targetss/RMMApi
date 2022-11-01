@@ -9,14 +9,26 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
+
+func (db *DBObject) Exit(c *gin.Context) {
+	_, err := c.Cookie("JWTAuth")
+	if err != nil {
+		c.Redirect(http.StatusFound, "/")
+	}
+	c.SetCookie("JWTAuth", "", 1, "/", "localhost", false, true)
+	c.Redirect(http.StatusFound, "/")
+}
 
 func (db *DBObject) Authorization(c *gin.Context) {
 	goodCookie, err := c.Cookie("JWTAuth")
 	if err != nil || auth.ValidateToken(goodCookie) != nil {
 		c.HTML(http.StatusOK, "auth.tmpl", gin.H{})
 	}
-	c.Redirect(http.StatusFound, "/api/users")
+	if err := auth.ValidateToken(goodCookie); err == nil {
+		c.Redirect(http.StatusFound, "/api/users")
+	}
 }
 
 func (db *DBObject) GetAccountsUser(c *gin.Context) {
@@ -38,6 +50,8 @@ func (db *DBObject) GetAccountsUser(c *gin.Context) {
 		for rows.Next() {
 			usr := AccountsUser{}
 			rows.Scan(&usr.LastLogin, &usr.IsSuperUser, &usr.UserName, &usr.FirstName, &usr.LastName, &usr.Email, &usr.DateJoined, &usr.LastLoginIP, &usr.RoleName)
+			usr.LastLogin = usr.LastLogin[:strings.Index(usr.LastLogin, "T")]
+			usr.DateJoined = usr.DateJoined[:strings.Index(usr.DateJoined, "T")]
 			AccountUsr = append(AccountUsr, usr)
 		}
 		//c.IndentedJSON(http.StatusOK, AccountUsr)
