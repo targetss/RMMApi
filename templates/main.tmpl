@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+        <title>ReportRMM</title>
+    </head>
+
+    <body>
+    {{ template "header.tmpl" }}
+        <section id="info-users">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <h1>Account users ReportRMM</h1>
+                        <table class="table table-dark table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">Последний вход</th>
+                                <th scope="col">Account</th>
+                                <th scope="col">Имя</th>
+                                <th scope="col">Фамилия</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Дата создания</th>
+                                <th scope="col">Авторизация</th>
+                                <th scope="col">Права</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{ range .users }}
+                                <tr>
+                                    <td>{{ .LastLogin }}</td>
+                                    <td>{{ .UserName }}</td>
+                                    <td>{{ .FirstName }}</td>
+                                    <td>{{ .LastName }}</td>
+                                    <td>{{ .Email }}</td>
+                                    <td>{{ .DateJoined }}</td>
+                                    <td>{{ .LastLoginIP }}</td>
+                                    <td>{{ .RoleName }}</td>
+                                </tr>
+                            {{ end }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="info-company"></section>
+        <section id="settings"></section>
+        <section id="reports"></section>
+        <section id="footer"></section>
+    </body>
+</html>

@@ -36,6 +36,7 @@ func main() {
 		auth.GET("/exit", connDB.Exit)
 		api := auth.Group("/api").Use(connDB.Auth())
 		{
+			api.GET("/infoObject", connDB.CheckInfoObjects)
 			api.GET("/users", connDB.GetAccountsUser)
 			api.GET("/site", connDB.GetListSite)
 			api.GET("/pc-site/:id", connDB.GetPCToSite)

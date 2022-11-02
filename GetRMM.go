@@ -10,7 +10,39 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
+
+func (db *DBObject) CheckInfoObjects(c *gin.Context) {
+	var (
+		valObject                           InfoObject
+		strSearchCount                      = "select count(*) from $1"
+		strStatusAgent                      = "select last_seen from agents_agent"
+		countAgentOnline, countAgentOffline int
+	)
+	db.DB.QueryRow(strSearchCount, "clients_site").Scan(&valObject.CountSite)
+	db.DB.QueryRow(strSearchCount, "agents_agent").Scan(&valObject.CountAgent)
+	res, err := db.DB.Query(strStatusAgent)
+	if err != nil {
+
+	}
+	for res.Next() {
+		var (
+			LastSeen    time.Time
+			//CurrentTime time.Time
+		)
+		err := res.Scan(&LastSeen)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":   http.StatusInternalServerError,
+				"response": "error read data in database(CheckInfoObjects)",
+			})
+		}
+		CurrentTime := time.Now()
+		time.
+
+	}
+}
 
 func (db *DBObject) Exit(c *gin.Context) {
 	_, err := c.Cookie("JWTAuth")
@@ -55,7 +87,7 @@ func (db *DBObject) GetAccountsUser(c *gin.Context) {
 			AccountUsr = append(AccountUsr, usr)
 		}
 		//c.IndentedJSON(http.StatusOK, AccountUsr)
-		c.HTML(http.StatusOK, "index.tmpl", gin.H{
+		c.HTML(http.StatusOK, "main.tmpl", gin.H{
 			"users": AccountUsr,
 		})
 	default:

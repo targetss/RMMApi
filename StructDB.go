@@ -3,6 +3,13 @@ package main
 type Requests interface {
 }
 
+type InfoObject struct {
+	CountSite    int `json:"count_site"`
+	CountAgent   int `json:"count_agent"`
+	AgentOffline int `json:"agent_offline"`
+	AgentOnline  int `json:"agent_online"`
+}
+
 type FullComputerInfo struct {
 	ID               int                      `json:"id"`
 	VersionAgent     string                   `json:"version"`
