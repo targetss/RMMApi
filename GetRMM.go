@@ -15,20 +15,21 @@ import (
 
 func (db *DBObject) CheckInfoObjects(c *gin.Context) {
 	var (
-		valObject                           InfoObject
-		strSearchCount                      = "select count(*) from $1"
-		strStatusAgent                      = "select last_seen from agents_agent"
-		countAgentOnline, countAgentOffline int
+		valObject InfoObject
+		//strSearchCount = `select count(*) from $1`
+		strStatusAgent = "select last_seen from agents_agent"
+		//countAgentOnline, countAgentOffline int
 	)
-	db.DB.QueryRow(strSearchCount, "clients_site").Scan(&valObject.CountSite)
-	db.DB.QueryRow(strSearchCount, "agents_agent").Scan(&valObject.CountAgent)
+	db.DB.QueryRow("select count(*) from clients_site").Scan(&valObject.CountSite)
+	db.DB.QueryRow("select count(*) from agents_agent").Scan(&valObject.CountAgent)
 	res, err := db.DB.Query(strStatusAgent)
 	if err != nil {
 
 	}
+	ekbTimeZone := time.FixedZone("Ekaterinburg", int((time.Hour * 0).Seconds()))
 	for res.Next() {
 		var (
-			LastSeen    time.Time
+			LastSeen time.Time
 			//CurrentTime time.Time
 		)
 		err := res.Scan(&LastSeen)
@@ -39,9 +40,19 @@ func (db *DBObject) CheckInfoObjects(c *gin.Context) {
 			})
 		}
 		CurrentTime := time.Now()
-		time.
+		correctTime := LastSeen.In(ekbTimeZone)
 
+		diff := CurrentTime.Sub(correctTime) //разница во времени //ТУТ ПРООБЛЕМА С ЧАСОВЫМИ ПОЯСАМИ
+		if diff > time.Minute*4 {
+			valObject.AgentOffline++
+		} else {
+			valObject.AgentOnline++
+		}
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"response": valObject,
+	})
 }
 
 func (db *DBObject) Exit(c *gin.Context) {

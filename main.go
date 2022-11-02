@@ -24,8 +24,8 @@ func main() {
 	gin.DefaultWriter = io.MultiWriter(connDB.log, os.Stdout)
 	r := gin.Default()
 
-	r.LoadHTMLGlob("C:\\Users\\admin\\go\\src\\RestApi\\templates\\*")
-	r.Static("/img", "C:\\Users\\admin\\go\\src\\RestApi\\img")
+	r.LoadHTMLGlob("C:\\Users\\admin\\GolandProjects\\RestApi\\templates\\*")
+	r.Static("/img", "C:\\Users\\admin\\GolandProjects\\RestApi\\img")
 
 	auth := r.Group("/")
 	{
