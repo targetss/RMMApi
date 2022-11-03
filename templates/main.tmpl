@@ -14,45 +14,41 @@
     <body>
     {{ template "header.tmpl" }}
         <section id="info-users">
-            <div class="container">
+            <div class="container text-center">
                 <div class="row">
-                    <div class="col-12">
-                        <h1>Account users ReportRMM</h1>
-                        <table class="table table-dark table-striped">
-                            <thead>
-                            <tr>
-                                <th scope="col">Последний вход</th>
-                                <th scope="col">Account</th>
-                                <th scope="col">Имя</th>
-                                <th scope="col">Фамилия</th>
-                                <th scope="col">Email</th>
-                                <th scope="col">Дата создания</th>
-                                <th scope="col">Авторизация</th>
-                                <th scope="col">Права</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {{ range .users }}
-                                <tr>
-                                    <td>{{ .LastLogin }}</td>
-                                    <td>{{ .UserName }}</td>
-                                    <td>{{ .FirstName }}</td>
-                                    <td>{{ .LastName }}</td>
-                                    <td>{{ .Email }}</td>
-                                    <td>{{ .DateJoined }}</td>
-                                    <td>{{ .LastLoginIP }}</td>
-                                    <td>{{ .RoleName }}</td>
-                                </tr>
-                            {{ end }}
-                            </tbody>
-                        </table>
+
+                    <div class="progress">
+                        <div class="progress-bar bg-success" role="progressbar" aria-label="Segment two" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="progress-bar bg-info" role="progressbar" aria-label="Segment three" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
+
                 </div>
             </div>
         </section>
-        <section id="info-company"></section>
+        <section id="info-company">
+            <div class="progress">
+                <div class="progress-bar bg-success" role="progressbar" aria-label="Segment two" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="progress-bar bg-info" role="progressbar" aria-label="Segment three" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+        </section>
         <section id="settings"></section>
         <section id="reports"></section>
         <section id="footer"></section>
+
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <script>
+            $(function (){
+                $.getJSON({
+                    url: "/api/infoObject",
+                    success: function (data) {
+                        console.log(data)
+                    }
+                });
+            });
+        </script>
     </body>
 </html>
