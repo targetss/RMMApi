@@ -15,10 +15,8 @@ import (
 
 func (db *DBObject) CheckInfoObjects(c *gin.Context) {
 	var (
-		valObject InfoObject
-		//strSearchCount = `select count(*) from $1`
+		valObject      InfoObject
 		strStatusAgent = "select last_seen from agents_agent"
-		//countAgentOnline, countAgentOffline int
 	)
 	db.DB.QueryRow("select count(*) from clients_site").Scan(&valObject.CountSite)
 	db.DB.QueryRow("select count(*) from agents_agent").Scan(&valObject.CountAgent)
