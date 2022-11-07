@@ -14,19 +14,71 @@
     <body>
     {{ template "header.tmpl" }}
         <section id="info-users">
-            <div class="container">
-                <div class="row col-3 align-items-center">
-                    <div class="card">
-                        <img src="/assets/img/status_agent.png" alt="Status Agents" class="card-img-top">
-                        <div class="card-body">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item"><i id="count_site" class="fa-solid fa-location-dot"></i></li>
-                                <li class="list-group-item"><i id="count_agent" class="fa-regular fa-rectangle-list"> 0</i></li>
-                                <li class="list-group-item"><i id="online_agent" class="fa-solid fa-check"> 200</i></li>
-                                <li class="list-group-item"><i id="offline_agent" class="fa-solid fa-xmark"> 80</i></li>
-                            </ul>
+            <div class="container-fluid">
+                <h2><i class="fa-solid fa-chart-line"></i>Dashboard</h2>
+            </div>
+            <div class="container-fluid">
+
+                <style>
+                    .list-group-item {
+                        position: relative;
+                        display: block;
+                        padding: .75rem 1.25rem;
+                        margin-bottom: -1px;
+                        background-color: #fff0;
+                        border: 1px solid rgba(0,0,0,.125);
+                    }
+                    .card-header{
+                        font-size: 1.6rem;
+                    }
+                </style>
+
+                <div class="row justify-content-around">
+                    <div class="col-xl-2 col-lg-3 col-md-6 align-self-start">
+                        <div class="card text-white bg-success mb-3" style="max-width: 18rem;">
+                            <div class="card-header">Status agents</div>
+                            <!--<img src="/assets/img/status_agent.png" alt="Status Agents" class="card-img-top">-->
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item"><i id="count_site" class="fa-solid fa-location-dot"></i></li>
+                                    <li class="list-group-item"><i id="count_agent" class="fa-regular fa-rectangle-list"> 0</i></li>
+                                    <li class="list-group-item"><i id="online_agent" class="fa-solid fa-check"> 200</i></li>
+                                    <li class="list-group-item"><i id="offline_agent" class="fa-solid fa-xmark"> 80</i></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="col-xl-2 col-lg-3 col-md-6 align-self-center">
+                        <div class="card text-white bg-info mb-3" style="max-width: 22rem;">
+                            <!--<img src="/assets/img/status_agent.png" alt="Status Agents" class="card-img-top">-->
+                            <div class="card-header">Status server</div>
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item"><i id="CPU" class="fa-solid fa-microchip"> 20%</i></li>
+                                    <li class="list-group-item"><i id="RAM" class="fa-regular fa-memory"> 14%</i></li>
+                                    <li class="list-group-item"><i id="DISK" class="fa-solid fa-inbox"> 80%</i></li>
+                                    <li class="list-group-item"><i id="Uptime" class="fa-solid fa-stopwatch"> 2 day</i></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-2 col-lg-3 col-md-6 align-self-end">
+                        <div class="card text-white bg-danger mb-3">
+                            <div class="card-header">Warning</div>
+                            <!--<img src="/assets/img/status_agent.png" alt="Status Agents" class="card-img-top">-->
+                            <div class="card-body">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item">Error read block</li>
+                                    <li class="list-group-item">Warning add data DB</li>
+                                    <li class="list-group-item">Error 3</li>
+                                    <li class="list-group-item">Error 4</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </section>
@@ -43,18 +95,6 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-        <script>
-            $(function (){
-                $.getJSON({
-                    url: "/api/infoObject",
-                    success: function (data) {
-                        $('#count_site').text(" " + data.response.count_site);
-                        $('#count_agent').text(" " + data.response.count_agent);
-                        $('#online_agent').text(" " + data.response.agent_online);
-                        $('#offline_agent').text(" " + data.response.agent_offline);
-                    }
-                });
-            });
-        </script>
+        <script src="/assets/scripts/agentsinfo.js"></script>
     </body>
 </html>

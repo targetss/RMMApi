@@ -126,8 +126,8 @@ func (db *DBObject) GetInfoComputer(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	connSearch := "select agents_agent.id, agents_agent.version, agents_agent.description, agents_agent.operating_system, agents_agent.disks," +
-		" agents_agent.public_ip, agents_agent.total_ram, agents_agent.logged_in_username, agents_agent.goarch, " +
+	connSearch := "select agents_agent.id, agents_agent.version, agents_agent.description, agents_agent.operating_system, agents_agent.disks, " +
+		"agents_agent.public_ip, agents_agent.total_ram, agents_agent.logged_in_username, agents_agent.goarch, " +
 		"software_installedsoftware.software, agents_agent.hostname, agents_agent.wmi_detail, agents_agent.site_id " +
 		"from agents_agent, software_installedsoftware where agents_agent.id =$1 and software_installedsoftware.agent_id = $2"
 
@@ -138,7 +138,7 @@ func (db *DBObject) GetInfoComputer(c *gin.Context) {
 	case sql.ErrNoRows:
 		c.JSON(http.StatusNoContent, gin.H{
 			"status":   http.StatusNoContent,
-			"response": "Computer not found, check id agent",
+			"response": "Computer not found, check correct id agent",
 		})
 		c.Abort()
 	case nil:
