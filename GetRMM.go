@@ -13,6 +13,46 @@ import (
 	"time"
 )
 
+func (db *DBObject) CreateTableSite(c *gin.Context) {
+	var (
+		objectClient = make([]InfoClient, 0)
+		countClient  int
+	)
+	res, err := db.DB.Query("select id, name from clients_client")
+	switch err {
+	case sql.ErrNoRows:
+		db.log.WriteString("Клиенты не найдены в БД")
+		c.JSON(http.StatusNotFound, gin.H{
+			"status":   http.StatusNotFound,
+			"response": "Клиенты не найдены в БД",
+		})
+		return
+	case nil:
+		for res.Next() {
+			var objClt InfoClient
+			res.Scan(&objClt.IDClient, &objClt.Client)
+			//objectClient = append(objectClient)
+			objectClient = append(objectClient, objClt)
+			countClient++
+		}
+	}
+
+	for ind, val := range objectClient {
+		res, err := db.DB.Query("select name from clients_site where client_id=$1", val.IDClient)
+		switch err {
+		case sql.ErrNoRows:
+
+		case nil:
+			for res.Next() {
+				var nameSite string
+				res.Scan(&nameSite)
+				objectClient[ind].Sites = append(objectClient[ind].Sites, nameSite)
+			}
+		}
+	}
+	fmt.Println("q")
+}
+
 func (db *DBObject) CheckInfoObjects(c *gin.Context) {
 	var (
 		valObject      InfoObject
@@ -152,6 +192,8 @@ func (db *DBObject) GetInfoComputer(c *gin.Context) {
 		if err := json.Unmarshal([]byte(strSoftware), &jsonSoftware); err != nil {
 			db.WriteLog("Error unmarshal string softwareInfo")
 		}
+
+		// !ДОДЕЛАТЬ! //
 	default:
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"status":   http.StatusInternalServerError,

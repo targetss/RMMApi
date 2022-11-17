@@ -41,6 +41,7 @@ func main() {
 			api.GET("/site", connDB.GetListSite)
 			api.GET("/pc-site/:id", connDB.GetPCToSite)
 			api.GET("/pc-info/:id", connDB.GetInfoComputer)
+			api.GET("/test", connDB.CreateTableSite)
 		}
 	}
 

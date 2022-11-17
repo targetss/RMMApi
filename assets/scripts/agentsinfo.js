@@ -1,8 +1,9 @@
-var urlGet = "/api/infoObject";
+var urlGetinfo = "/api/infoObject";
+let urlGetSite = "/api/site"
 
 $(function (){
     $.getJSON({
-        url: urlGet,
+        url: urlGetinfo,
         success: function (data) {
             $('#count_site').text(" " + data.response.count_site);
             $('#count_agent').text(" " + data.response.count_agent);
@@ -10,4 +11,19 @@ $(function (){
             $('#offline_agent').text(" " + data.response.agent_offline);
         }
     });
+});
+
+let arrSite = [];
+
+$(function (){
+   $.getJSON({
+       url: urlGetSite,
+       success: function (data){
+           arrSite = data;
+           for(var i = 0; i < arrSite.length; i++){
+               let oldHtml = $('#site').html();
+               $('#site').html(oldHtml + "<li>" + arrSite[i].name + "</li>");
+           };
+       }
+   });
 });

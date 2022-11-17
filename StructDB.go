@@ -3,6 +3,16 @@ package main
 type Requests interface {
 }
 
+type InfoClient struct {
+	IDClient     int      `json:"id"`
+	Client       string   `json:"client"`
+	Sites        []string `json:"site"`
+	CountAgent   []int    `json:"count_agent"`
+	AgentOnline  []int    `json:"agent_online"`
+	AgentOffline []int    `json:"agent_offline"`
+	CountNotes   []string `json:"notes"`
+}
+
 type InfoObject struct {
 	CountSite    int `json:"count_site"`
 	CountAgent   int `json:"count_agent"`
